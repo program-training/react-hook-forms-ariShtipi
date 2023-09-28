@@ -1,65 +1,57 @@
-import  { useState, ChangeEvent, FormEvent } from 'react';
+import { useForm, SubmitHandler } from "react-hook-form";
 
 interface FormData {
   username: string;
   email: string;
-  password:string;
+  password: string;
 }
+const passwordPattern = /^(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[@#$%^&+=!])(?!.*\s).{8,20}$/;
+
+const onSubmit: SubmitHandler<FormData> = (data) =>
+  alert(` user name :${data.username} email: ${data.email} `);
 
 function RegularForm() {
-  const [formData, setFormData] = useState<FormData>({
-    username: '',
-    email: '',
-    password: '',
-  });
-
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-  };
-
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    alert(JSON.stringify(formData));
-  };
+  const {
+    register,
+    formState: { errors },
+    handleSubmit,
+  } = useForm<FormData>();
 
   return (
-    <form onSubmit={handleSubmit}>
-        <h1>Change Me To React Hook Form</h1>
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <h1>React Hook Form</h1>
       <div>
         <input
-          type="text"
-          id="username"
-          name="username"
-          placeholder='Enter UserName'
-          value={formData.username}
-          onChange={handleChange}
+          placeholder="enter user name"
+          {...register("username", {
+            required: true,
+            maxLength: 20,
+            minLength: 2,
+          })}
+        />
+        {errors.username && "username is required"}
+      </div>
+      <div>
+        <input
+          type="email"
+          placeholder="enter email"
+          {...register("email", {
+            required: true,
+            minLength: 7,
+          })}
         />
       </div>
       <div>
         <input
-          type="text"
-          id="email"
-          name="email"
-          placeholder='Enter Email'
-          value={formData.email}
-          onChange={handleChange}
+          placeholder="enter password"
+          {...register("password", {
+            required: true,
+            pattern: passwordPattern,
+          })}
         />
+        {errors.password && "password is required"}
       </div>
-      <div>
-        <input
-          type="text"
-          id="password"
-          name="password"
-          placeholder='Enter Password'
-          value={formData.password}
-          onChange={handleChange}
-        />
-      </div>
-      <button type="submit">Submit</button>
+      <input type="submit" />
     </form>
   );
 }
